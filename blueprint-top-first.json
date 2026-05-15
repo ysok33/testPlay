@@ -1,0 +1,61 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "preferredVersions": {
+    "php": "8.0",
+    "wp": "latest"
+  },
+  "landingPage": "/",
+  "login": false,
+  "steps": [
+    {
+      "step": "installTheme",
+      "themeData": {
+        "resource": "url",
+        "url": "https://raw.githubusercontent.com/ysok33/testPlay/main/shigaku-tokyo-block-theme.zip"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp option update blogname '東京都私学財団 提案デモ'"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp option update blogdescription '営業共有用のWordPress Playgroundデモ'"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp option update show_on_front 'posts'"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp menu create 'Primary Navigation'"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp menu item add-custom 'Primary Navigation' '制度情報' '/programs/'"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp menu item add-custom 'Primary Navigation' '財団について' '/about/'"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp menu item add-custom 'Primary Navigation' 'お知らせ' '/news/'"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp menu item add-custom 'Primary Navigation' 'お問い合わせ' '/contact/'"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require_once '/wordpress/wp-load.php'; $menu = wp_get_nav_menu_object('Primary Navigation'); $locations = get_theme_mod('nav_menu_locations'); if (!is_array($locations)) { $locations = array(); } $locations['primary'] = $menu->term_id; set_theme_mod('nav_menu_locations', $locations); ?>"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp post generate --count=3 --post_type=post --post_status=publish"
+    }
+  ]
+}
