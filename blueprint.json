@@ -25,7 +25,7 @@
       "step": "installTheme",
       "themeZipFile": {
         "resource": "url",
-        "url": "https://raw.githubusercontent.com/ysok33/testPlay/main/sigroup-block-theme.tar.gz"
+        "url": "https://raw.githubusercontent.com/ysok33/testPlay/main/sigroup-block-theme.zip"
       }
     },
     {
