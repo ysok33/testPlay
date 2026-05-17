@@ -25,7 +25,7 @@
       "step": "installTheme",
       "themeZipFile": {
         "resource": "url",
-        "url": "https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/ysok33/testPlay/main/blueprint.json"
+        "url": "https://raw.githubusercontent.com/ysok33/testPlay/main/sigroup-block-theme.tar.gz"
       }
     },
     {
