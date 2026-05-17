@@ -1,0 +1,48 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/",
+  "preferredVersions": {
+    "php": "8.2",
+    "wp": "6.5"
+  },
+  "features": {
+    "networking": true
+  },
+  "steps": [
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "blogname": "SIgroup株式会社",
+        "blogdescription": "営業力と人財力で、現場の成果まで設計する。"
+      }
+    },
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    },
+    {
+      "step": "installTheme",
+      "themeZipFile": {
+        "resource": "url",
+        "url": "https://raw.githubusercontent.com/ysok33/testPlay/main/sigroup-playground-block-theme-final.zip"
+      }
+    },
+    {
+      "step": "activateTheme",
+      "themeFolderName": "si-group-playground-theme-final"
+    },
+    {
+      "step": "writeFile",
+      "path": "/tmp/seed-pages.php",
+      "data": {
+        "resource": "url",
+        "url": "https://raw.githubusercontent.com/ysok33/testPlay/main/seed-pages.php"
+      }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require 'wordpress/wp-load.php'; require '/tmp/seed-pages.php';"
+    }
+  ]
+}
