@@ -25,7 +25,7 @@
       "step": "installTheme",
       "themeZipFile": {
         "resource": "url",
-        "url": "REPLACE_WITH_THEME_ARCHIVE_URL"
+        "url": "https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/ysok33/testPlay/main/blueprint.json"
       }
     },
     {
