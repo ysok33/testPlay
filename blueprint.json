@@ -1,0 +1,45 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/wp-admin/site-editor.php",
+  "preferredVersions": {
+    "php": "8.2",
+    "wp": "6.5"
+  },
+  "features": {
+    "networking": true
+  },
+  "steps": [
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "blogname": "SIgroup株式会社",
+        "blogdescription": "営業力と人財力で、現場の成果まで設計する。"
+      }
+    },
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    },
+    {
+      "step": "installTheme",
+      "themeZipFile": {
+        "resource": "url",
+        "url": "REPLACE_WITH_THEME_ARCHIVE_URL"
+      }
+    },
+    {
+      "step": "activateTheme",
+      "themeFolderName": "si-group-block-theme"
+    },
+    {
+      "step": "writeFile",
+      "path": "/wordpress/wp-content/mu-plugins/sigroup-setup.php",
+      "data": "<?php\nadd_action('init', function () {\n    if (get_option('sigroup_demo_initialized')) { return; }\n\n    $pages = [\n        'home' => ['title' => 'ホーム', 'slug' => 'home', 'content' => ''],\n        'company' => ['title' => '会社概要', 'slug' => 'company', 'content' => '<!-- wp:pattern {\\\"slug\\\":\\\"sigroup/company-profile\\\"} /-->'],\n        'recruit' => ['title' => '採用情報', 'slug' => 'recruit', 'content' => '<!-- wp:pattern {\\\"slug\\\":\\\"sigroup/recruit-sections\\\"} /-->'],\n        'contact' => ['title' => 'お問い合わせ', 'slug' => 'contact', 'content' => '<!-- wp:group {\\\"className\\\":\\\"contact-card\\\",\\\"style\\\":{\\\"spacing\\\":{\\\"padding\\\":{\\\"top\\\":\\\"2rem\\\",\\\"right\\\":\\\"2rem\\\",\\\"bottom\\\":\\\"2rem\\\",\\\"left\\\":\\\"2rem\\\"}}}} --><div class=\\\"wp-block-group contact-card\\\" style=\\\"padding-top:2rem;padding-right:2rem;padding-bottom:2rem;padding-left:2rem\\\"><!-- wp:heading {\\\"level\\\":1,\\\"fontSize\\\":\\\"x-large\\\"} --><h1 class=\\\"wp-block-heading has-x-large-font-size\\\">お問い合わせ</h1><!-- /wp:heading --><!-- wp:paragraph {\\\"textColor\\\":\\\"muted\\\"} --><p class=\\\"has-muted-color has-text-color\\\">事業相談、採用応募、各種お問い合わせは下記までご連絡ください。</p><!-- /wp:paragraph --><!-- wp:list --><ul><li>TEL 086-238-5396</li><li>FAX 086-238-5397</li><li>受付時間 10:00〜18:00（月〜金、祝祭日・年末年始除く）</li></ul><!-- /wp:list --></div><!-- /wp:group -->'},\n        'privacy' => ['title' => '個人情報保護方針', 'slug' => 'privacy', 'content' => '<!-- wp:pattern {\\\"slug\\\":\\\"sigroup/privacy-policy\\\"} /-->']\n    ];\n\n    $ids = [];\n    foreach ($pages as $key => $page) {\n        $existing = get_page_by_path($page['slug']);\n        if ($existing) {\n            $ids[$key] = $existing->ID;\n            continue;\n        }\n        $ids[$key] = wp_insert_post([\n            'post_type' => 'page',\n            'post_status' => 'publish',\n            'post_title' => $page['title'],\n            'post_name' => $page['slug'],\n            'post_content' => $page['content']\n        ]);\n    }\n\n    if (!empty($ids['home'])) {\n        update_option('show_on_front', 'page');\n        update_option('page_on_front', $ids['home']);\n    }\n\n    $menu_id = wp_create_nav_menu('Primary Navigation');\n    if (!is_wp_error($menu_id)) {\n        foreach (['home','company','recruit','contact','privacy'] as $key) {\n            if (!empty($ids[$key])) {\n                wp_update_nav_menu_item($menu_id, 0, [\n                    'menu-item-title' => get_the_title($ids[$key]),\n                    'menu-item-object' => 'page',\n                    'menu-item-object-id' => $ids[$key],\n                    'menu-item-type' => 'post_type',\n                    'menu-item-status' => 'publish'\n                ]);\n            }\n        }\n        $locations = get_theme_mod('nav_menu_locations', []);\n        $locations['primary'] = $menu_id;\n        set_theme_mod('nav_menu_locations', $locations);\n    }\n\n    update_option('sigroup_demo_initialized', 1);\n});\n"
+    },
+    {
+      "step": "runPHP",
+      "code": "require_once '/wordpress/wp-load.php'; do_action('init');"
+    }
+  ]
+}
