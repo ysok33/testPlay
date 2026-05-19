@@ -1,0 +1,56 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/",
+  "preferredVersions": {
+    "php": "8.0",
+    "wp": "latest"
+  },
+  "steps": [
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    },
+    {
+      "step": "installTheme",
+      "themeZipFile": {
+        "resource": "url",
+        "url": "https://raw.githubusercontent.com/ysok33/testPlay/main/sigroup-theme-final.zip"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "blogname": "SIgroup株式会社",
+        "blogdescription": "営業力と人財力で、現場の成果まで設計する"
+      }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\nrequire_once 'wordpress/wp-load.php';\n\n$page_id = wp_insert_post([\n    'post_title' => 'ホーム',\n    'post_name' => 'home',\n    'post_content' => '<!-- wp:pattern {\"slug\":\"sigroup-theme/hero-home\"} /--><!-- wp:pattern {\"slug\":\"sigroup-theme/features-grid\"} /--><!-- wp:pattern {\"slug\":\"sigroup-theme/latest-news\"} /-->',\n    'post_status' => 'publish',\n    'post_type' => 'page'\n]);\n\nif ($page_id) {\n    update_option('page_on_front', $page_id);\n    update_option('show_on_front', 'page');\n    echo \"✓ ホームページ作成完了 (ID: $page_id)\\n\";\n} else {\n    echo \"✗ ホームページ作成失敗\\n\";\n}\n?>"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\nrequire_once 'wordpress/wp-load.php';\n\n$page_id = wp_insert_post([\n    'post_title' => '会社概要',\n    'post_name' => 'company',\n    'post_content' => '<!-- wp:pattern {\"slug\":\"sigroup-theme/company-info\"} /-->',\n    'post_status' => 'publish',\n    'post_type' => 'page'\n]);\n\necho $page_id ? \"✓ 会社概要ページ作成完了 (ID: $page_id)\\n\" : \"✗ 会社概要ページ作成失敗\\n\";\n?>"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\nrequire_once 'wordpress/wp-load.php';\n\n$page_id = wp_insert_post([\n    'post_title' => '採用情報',\n    'post_name' => 'recruit',\n    'post_content' => '<!-- wp:pattern {\"slug\":\"sigroup-theme/recruit-page\"} /-->',\n    'post_status' => 'publish',\n    'post_type' => 'page'\n]);\n\necho $page_id ? \"✓ 採用情報ページ作成完了 (ID: $page_id)\\n\" : \"✗ 採用情報ページ作成失敗\\n\";\n?>"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\nrequire_once 'wordpress/wp-load.php';\n\n$page_id = wp_insert_post([\n    'post_title' => 'お問い合わせ',\n    'post_name' => 'contact',\n    'post_content' => '<!-- wp:pattern {\"slug\":\"sigroup-theme/contact-page\"} /-->',\n    'post_status' => 'publish',\n    'post_type' => 'page'\n]);\n\necho $page_id ? \"✓ お問い合わせページ作成完了 (ID: $page_id)\\n\" : \"✗ お問い合わせページ作成失敗\\n\";\n?>"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\nrequire_once 'wordpress/wp-load.php';\n\n$page_id = wp_insert_post([\n    'post_title' => '個人情報保護方針',\n    'post_name' => 'privacy',\n    'post_content' => '<!-- wp:pattern {\"slug\":\"sigroup-theme/privacy-page\"} /-->',\n    'post_status' => 'publish',\n    'post_type' => 'page'\n]);\n\necho $page_id ? \"✓ 個人情報保護方針ページ作成完了 (ID: $page_id)\\n\" : \"✗ 個人情報保護方針ページ作成失敗\\n\";\n?>"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\nrequire_once 'wordpress/wp-load.php';\n\n// 既存メニュー削除\n$menus = wp_get_nav_menus();\nforeach ($menus as $menu) {\n    wp_delete_nav_menu($menu->term_id);\n}\n\n// 新規メニュー作成\n$menu_id = wp_create_nav_menu('Primary Menu');\n\nif ($menu_id && !is_wp_error($menu_id)) {\n    $pages = [\n        ['slug' => 'home', 'title' => 'ホーム'],\n        ['slug' => 'company', 'title' => '会社概要'],\n        ['slug' => 'recruit', 'title' => '採用情報'],\n        ['slug' => 'contact', 'title' => 'お問い合わせ'],\n        ['slug' => 'privacy', 'title' => '個人情報保護方針']\n    ];\n\n    $position = 1;\n    foreach ($pages as $page_data) {\n        $page = get_page_by_path($page_data['slug']);\n        if ($page) {\n            wp_update_nav_menu_item($menu_id, 0, [\n                'menu-item-title' => $page_data['title'],\n                'menu-item-object' => 'page',\n                'menu-item-object-id' => $page->ID,\n                'menu-item-type' => 'post_type',\n                'menu-item-status' => 'publish',\n                'menu-item-position' => $position++\n            ]);\n        }\n    }\n\n    echo \"✓ ナビゲーションメニュー作成完了 (ID: $menu_id)\\n\";\n} else {\n    echo \"✗ ナビゲーションメニュー作成失敗\\n\";\n}\n\n// パーマリンク設定\nglobal $wp_rewrite;\n$wp_rewrite->set_permalink_structure('/%postname%/');\n$wp_rewrite->flush_rules();\n\necho \"✓ パーマリンク設定完了\\n\";\n\n// 最終確認\n$all_pages = get_pages(['post_status' => 'publish']);\necho \"\\n作成済みページ一覧:\\n\";\nforeach ($all_pages as $page) {\n    echo \"  - {$page->post_title} (/{$page->post_name}/)\\n\";\n}\n?>"
+    }
+  ]
+}
