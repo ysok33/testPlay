@@ -1,0 +1,42 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/",
+  "preferredVersions": {
+    "php": "8.0",
+    "wp": "latest"
+  },
+  "steps": [
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    },
+    {
+      "step": "installTheme",
+      "themeZipFile": {
+        "resource": "url",
+        "url": "https://raw.githubusercontent.com/ysok33/testPlay/main/sigroup-theme-final.zip"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "blogname": "SIgroup株式会社",
+        "blogdescription": "営業力と人財力で、現場の成果まで設計する",
+        "show_on_front": "page"
+      }
+    },
+    {
+      "step": "writeFile",
+      "path": "/wordpress/wp-content/mu-plugins/sigroup-setup.php",
+      "data": "<?php\n// ホームページ設定\nadd_action('init', function() {\n    $front_page = get_page_by_path('home');\n    if ($front_page) {\n        update_option('page_on_front', $front_page->ID);\n        update_option('show_on_front', 'page');\n    }\n});\n\n// パーマリンク設定\nadd_action('init', function() {\n    global $wp_rewrite;\n    $wp_rewrite->set_permalink_structure('/%postname%/');\n    $wp_rewrite->flush_rules();\n}, 99);\n?>"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\n// 固定ページ作成\n$pages = [\n    ['title' => 'ホーム', 'slug' => 'home', 'pattern' => 'sigroup-theme/hero-home'],\n    ['title' => '会社概要', 'slug' => 'company', 'pattern' => 'sigroup-theme/company-info'],\n    ['title' => '採用情報', 'slug' => 'recruit', 'pattern' => 'sigroup-theme/recruit-page'],\n    ['title' => 'お問い合わせ', 'slug' => 'contact', 'pattern' => 'sigroup-theme/contact-page'],\n    ['title' => '個人情報保護方針', 'slug' => 'privacy', 'pattern' => 'sigroup-theme/privacy-page']\n];\n\nforeach ($pages as $page_data) {\n    $existing = get_page_by_path($page_data['slug']);\n    if (!$existing) {\n        $content = '<!-- wp:pattern {\"slug\":\"' . $page_data['pattern'] . '\"} /-->';\n        wp_insert_post([\n            'post_title' => $page_data['title'],\n            'post_name' => $page_data['slug'],\n            'post_content' => $content,\n            'post_status' => 'publish',\n            'post_type' => 'page'\n        ]);\n    }\n}\n\n// ナビゲーションメニュー作成\n$menu_name = 'primary';\n$menu_exists = wp_get_nav_menu_object($menu_name);\n\nif (!$menu_exists) {\n    $menu_id = wp_create_nav_menu($menu_name);\n\n    $pages_for_menu = ['home', 'company', 'recruit', 'contact', 'privacy'];\n    $position = 1;\n\n    foreach ($pages_for_menu as $slug) {\n        $page = get_page_by_path($slug);\n        if ($page) {\n            wp_update_nav_menu_item($menu_id, 0, [\n                'menu-item-title' => $page->post_title,\n                'menu-item-object' => 'page',\n                'menu-item-object-id' => $page->ID,\n                'menu-item-type' => 'post_type',\n                'menu-item-status' => 'publish',\n                'menu-item-position' => $position++\n            ]);\n        }\n    }\n}\n\n// ホームページ設定\n$front_page = get_page_by_path('home');\nif ($front_page) {\n    update_option('page_on_front', $front_page->ID);\n    update_option('show_on_front', 'page');\n}\n\necho '✓ 固定ページとメニューを作成しました';\n?>"
+    }
+  ]
+}
