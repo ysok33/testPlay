@@ -1,0 +1,36 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/",
+  "preferredVersions": {
+    "php": "8.0",
+    "wp": "latest"
+  },
+  "steps": [
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    },
+    {
+      "step": "installTheme",
+      "themeZipFile": {
+        "resource": "url",
+        "url": "https://raw.githubusercontent.com/ysok33/testPlay/main/sigroup-theme-v2.zip"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "blogname": "SIgroup株式会社",
+        "blogdescription": "営業力と人財力で、現場の成果まで設計する"
+      }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\nrequire_once 'wordpress/wp-load.php';\n\n// パーマリンク設定\nglobal $wp_rewrite;\n$wp_rewrite->set_permalink_structure('/%postname%/');\n$wp_rewrite->flush_rules(true);\n\n$pages = [\n    [\n        'title'   => 'ホーム',\n        'slug'    => 'home',\n        'content' => '<!-- wp:pattern {\"slug\":\"sigroup-theme/home\"} /-->',\n        'front'   => true\n    ],\n    [\n        'title'   => '会社概要',\n        'slug'    => 'company',\n        'content' => '<!-- wp:pattern {\"slug\":\"sigroup-theme/company\"} /-->'\n    ],\n    [\n        'title'   => '採用情報',\n        'slug'    => 'recruit',\n        'content' => '<!-- wp:pattern {\"slug\":\"sigroup-theme/recruit\"} /-->'\n    ],\n    [\n        'title'   => 'お問い合わせ',\n        'slug'    => 'contact',\n        'content' => '<!-- wp:pattern {\"slug\":\"sigroup-theme/contact\"} /-->'\n    ],\n    [\n        'title'   => '個人情報保護方針',\n        'slug'    => 'privacy',\n        'content' => '<!-- wp:pattern {\"slug\":\"sigroup-theme/privacy\"} /-->'\n    ],\n];\n\n$front_id = 0;\nforeach ($pages as $p) {\n    // 既存削除\n    $existing = get_page_by_path($p['slug']);\n    if ($existing) wp_delete_post($existing->ID, true);\n\n    $id = wp_insert_post([\n        'post_title'   => $p['title'],\n        'post_name'    => $p['slug'],\n        'post_content' => $p['content'],\n        'post_status'  => 'publish',\n        'post_type'    => 'page',\n    ]);\n    echo ($id && !is_wp_error($id)) ? \"OK: {$p['title']} (ID:{$id})\\n\" : \"FAIL: {$p['title']}\\n\";\n\n    if (!empty($p['front'])) $front_id = $id;\n}\n\n// ホームページ設定\nif ($front_id) {\n    update_option('show_on_front', 'page');\n    update_option('page_on_front', $front_id);\n    echo \"Front page set: ID {$front_id}\\n\";\n}\n\n// パーマリンク再フラッシュ\n$wp_rewrite->flush_rules(true);\necho \"Done.\\n\";\n?>"
+    }
+  ]
+}
